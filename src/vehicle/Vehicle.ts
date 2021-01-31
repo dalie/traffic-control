@@ -18,7 +18,7 @@ export class Vehicle {
 
   private _cfg = {
     airResist: 2.5,
-    brakeForce: 22000,
+    brakeForce: 20000,
     cgHeight: 0.55,
     cgToFront: 2,
     cgToFrontAxle: 1.25,
@@ -27,7 +27,7 @@ export class Vehicle {
     cornerStiffnessFront: 5,
     cornerStiffnessRear: 5.2,
     eBrakeForce: 4000,
-    engineForce: 18000,
+    engineForce: 10000,
     gravity: 9.81,
     halfWidth: 0.8,
     height: 1.5,
@@ -37,7 +37,7 @@ export class Vehicle {
     mass: 1200,
     maxStreer: 70,
     rollResist: 8,
-    tireGrip: 2,
+    tireGrip: 20,
     weightTransfer: 0.2,
     wheelRadius: 0.3,
     wheelWidth: 0.2,
@@ -50,9 +50,11 @@ export class Vehicle {
     private _cursors: Phaser.Types.Input.Keyboard.CursorKeys
   ) {
     this._sprite.setPosition(this._path.getStartPoint().x, this._path.getStartPoint().y);
+    this._sprite.setScale((1 / 32) * this._cfg.length);
+
     const t = this._path.getTangent(0).angle();
     this._sprite.setRotation(t + Math.PI / 2);
-    this._pathLength = this._path.getLength() / 40;
+    this._pathLength = this._path.getLength() / 8;
   }
 
   update(time: number, delta: number) {
