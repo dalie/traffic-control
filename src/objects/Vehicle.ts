@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { Lane } from './Lane';
 
 export class Vehicle {
   private _throttle = 0;
@@ -18,7 +19,7 @@ export class Vehicle {
 
   private _cfg = {
     airResist: 2.5,
-    brakeForce: 20000,
+    brakeForce: 12000,
     cgHeight: 0.55,
     cgToFront: 2,
     cgToFrontAxle: 1.25,
@@ -27,7 +28,7 @@ export class Vehicle {
     cornerStiffnessFront: 5,
     cornerStiffnessRear: 5.2,
     eBrakeForce: 4000,
-    engineForce: 10000,
+    engineForce: 8000,
     gravity: 9.81,
     halfWidth: 0.8,
     height: 1.5,
@@ -44,17 +45,21 @@ export class Vehicle {
     width: 2,
   };
 
+  get speed() {
+    return Math.round(this._speed) + 'km/h';
+  }
+
   constructor(
     private _sprite: Phaser.GameObjects.Sprite,
-    private _path: Phaser.Curves.Path,
+    private _lane: Lane,
     private _cursors: Phaser.Types.Input.Keyboard.CursorKeys
   ) {
-    this._sprite.setPosition(this._path.getStartPoint().x, this._path.getStartPoint().y);
-    this._sprite.setScale((1 / 32) * this._cfg.length);
+    this._sprite.setPosition(this._lane.path.getStartPoint().x, this._lane.path.getStartPoint().y);
+    this._sprite.setScale((1 / 256) * this._cfg.length);
 
-    const t = this._path.getTangent(0).angle();
+    const t = this._lane.path.getTangent(0).angle();
     this._sprite.setRotation(t + Math.PI / 2);
-    this._pathLength = this._path.getLength() / 8;
+    this._pathLength = this._lane.path.getLength() / 8;
   }
 
   update(time: number, delta: number) {
@@ -131,7 +136,7 @@ export class Vehicle {
       (frictionForceFront_cy + tractionForce_cy) * cfg.cgToFrontAxle - frictionForceRear_cy * cfg.cgToRearAxle;
 
     //  Sim gets unstable at very slow speeds, so just stop the car
-    if (Math.abs(this._absVelocity) < 0.5 && !throttle) {
+    if (Math.abs(this._absVelocity) < 0.125 && !throttle) {
       this._velocity.x = this._velocity.y = this._absVelocity = 0;
       angularTorque = this._yawRate = 0;
     }
@@ -151,15 +156,11 @@ export class Vehicle {
       this._position.x = normalizedPos * this._pathLength;
     }
 
-    const posOnPath = this._path.getPoint(normalizedPos);
+    const posOnPath = this._lane.path.getPoint(normalizedPos);
 
-    const t = this._path.getTangent(normalizedPos);
+    const t = this._lane.path.getTangent(normalizedPos);
     this._sprite.setPosition(posOnPath.x, posOnPath.y);
     this._sprite.setRotation(t.angle() + Math.PI / 2);
-
-    if (this._cursors.up.isDown) {
-      //this._sprite.x += 5;
-    }
   }
 
   private sign(n: number): number {
